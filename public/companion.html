@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111013">
+  <meta name="description" content="Read Pulse Choir's live music activity with accessible text and announcements.">
+  <title>Pulse Choir — accessible companion</title>
+  <link rel="stylesheet" href="/companion.css">
+  <script src="/companion.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to companion</a>
+  <header class="companion-header">
+    <a class="brand" href="/" aria-label="Pulse Choir home">Pulse Choir</a>
+    <span>Accessible live companion</span>
+  </header>
+  <main id="main" class="companion-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">FOLLOW THE COMPOSITION</p>
+      <h1 id="page-title">Hear the beat.<br><span>Read every note.</span></h1>
+      <p>This page provides live text updates for Pulse Choir. It does not play sound and does not rely on the stream's visualizer. Viewers can participate through ordinary Twitch text chat.</p>
+    </section>
+
+    <form id="channel-form" class="channel-form">
+      <label for="channel-input">Twitch channel name</label>
+      <div class="channel-row"><span aria-hidden="true">@</span><input id="channel-input" name="channel" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="25" pattern="@?[A-Za-z0-9_]{1,25}" required><button class="button" type="submit">Open companion</button></div>
+      <p id="channel-feedback" class="feedback" role="status"></p>
+    </form>
+
+    <section id="companion-view" hidden aria-labelledby="channel-title">
+      <div class="channel-heading"><div><p class="eyebrow">LIVE CHANNEL</p><h2 id="channel-title" tabindex="-1">Waiting for channel</h2></div><p class="connection-status" id="connection-status" role="status">Loading channel state</p></div>
+      <div class="state-grid" aria-label="Current musical settings">
+        <div><span>Tempo</span><strong id="tempo-value">—</strong></div>
+        <div><span>Key and scale</span><strong id="scale-value">—</strong></div>
+        <div><span>Choir</span><strong id="running-value">—</strong></div>
+        <div><span>Streamer mute</span><strong id="mute-value">—</strong></div>
+      </div>
+
+      <section class="rhythm-card" aria-labelledby="rhythm-title">
+        <p class="eyebrow">THE LAST NOTE'S PLACE</p><h3 id="rhythm-title">Four-beat rhythm</h3>
+        <ol class="beat-grid" id="beat-grid" aria-label="Last note position in a four-beat bar">
+          <li data-beat="1"><span>Beat 1</span><small></small></li><li data-beat="2"><span>Beat 2</span><small></small></li><li data-beat="3"><span>Beat 3</span><small></small></li><li data-beat="4"><span>Beat 4</span><small></small></li>
+        </ol>
+        <p id="rhythm-summary">No recent accepted note is available.</p>
+      </section>
+
+      <section class="activity-card" aria-labelledby="activity-title">
+        <div class="section-head"><div><p class="eyebrow">CHAT COMPOSITION</p><h3 id="activity-title">Recent notes</h3></div><span id="note-count">0 accepted notes</span></div>
+        <ol id="note-list" class="note-list"><li class="empty">Waiting for real accepted chat commands. No sample activity is shown.</li></ol>
+      </section>
+
+      <p class="participation">To contribute, send <code>!pulse 1</code> through <code>!pulse 7</code> or <code>!pulse clap</code> in this channel's Twitch chat. No voice input is needed.</p>
+    </section>
+
+    <section class="access-card" aria-labelledby="access-title">
+      <p class="eyebrow">MAKE THIS PAGE YOURS</p><h2 id="access-title">Reading and announcement settings</h2>
+      <div class="access-controls">
+        <label for="announcement-rate">Announcement pace</label><select id="announcement-rate"><option value="30000">Quiet — up to one update every 30 seconds</option><option value="10000" selected>Balanced — up to one update every 10 seconds</option><option value="3000">Frequent — up to one update every 3 seconds</option></select>
+        <label for="announcement-detail">Announcement detail</label><select id="announcement-detail"><option value="concise">Concise — latest note and beat</option><option value="detailed">Detailed — latest note, beat, key and tempo</option></select>
+      </div>
+      <div class="access-actions"><button class="button button-secondary" id="toggle-announcements" type="button" aria-pressed="false">Pause announcements</button><div class="text-size"><span>Text size</span><button id="text-smaller" type="button" aria-label="Decrease text size">A−</button><button id="text-larger" type="button" aria-label="Increase text size">A+</button></div></div>
+      <div class="access-toggles"><label><input id="high-contrast" type="checkbox"> High contrast</label><label><input id="reduce-motion" type="checkbox"> Reduce motion</label></div>
+      <p class="privacy-note">This companion shows musical notes and channel state, not viewer names or chat text. The OBS visualizer appears in the broadcast video; this separate page provides the screen-reader-friendly text view.</p>
+    </section>
+
+    <div id="announcements" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+  </main>
+</body>
+</html>

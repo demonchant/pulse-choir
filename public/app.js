@@ -67,6 +67,9 @@ async function loadState() {
   landing.hidden = true; dashboard.hidden = false; renderState(me.state);
   const sourceButton = $('#create-overlay');
   sourceButton.textContent = me.overlayReady ? 'Rotate private source link ↗' : 'Create private source link ↗';
+  const companionUrl = new URL('/companion', location.origin);
+  companionUrl.searchParams.set('channel', me.owner.login);
+  $('#companion-url').value = companionUrl.toString();
   return true;
 }
 async function poll() {
@@ -113,6 +116,11 @@ $('#copy-overlay').addEventListener('click', async () => {
   const input = $('#overlay-url');
   try { await navigator.clipboard.writeText(input.value); feedback($('#overlay-feedback'), 'Private OBS URL copied to clipboard.'); }
   catch { input.select(); feedback($('#overlay-feedback'), 'Clipboard access failed. The URL is selected so you can copy it manually.', true); }
+});
+$('#copy-companion').addEventListener('click', async () => {
+  const input = $('#companion-url');
+  try { await navigator.clipboard.writeText(input.value); feedback($('#companion-feedback'), 'Accessible companion link copied.'); }
+  catch { input.select(); feedback($('#companion-feedback'), 'Clipboard access failed. The link is selected so you can copy it manually.', true); }
 });
 $('#disconnect').addEventListener('click', async () => {
   if (!window.confirm('Disconnect this Twitch channel and revoke Pulse Choir access? The current private OBS link will stop working.')) return;

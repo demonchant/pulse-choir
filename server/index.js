@@ -7,6 +7,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { loadConfig } from './env.js';
 import { Store, hashSecret, normalizeSettings } from './store.js';
 import { acceptChatMessage, TokenBucket } from './music.js';
+import { normalizeChannelLogin, publicState } from './public-state.js';
 import { authorizationUrl, exchangeCode, EventSubClient, getIdentity, refreshToken, revokeToken, validateToken } from './twitch.js';
 
 let config;
@@ -18,6 +19,7 @@ await store.init();
 const root = resolve(fileURLToPath(new URL('../public', import.meta.url)));
 const server = createServer(handleHttp);
 const overlaySockets = new WebSocketServer({ noServer: true, clientTracking: true, maxPayload: 2048, perMessageDeflate: false, handleProtocols: (protocols) => protocols.has('pulse-overlay') ? 'pulse-overlay' : false });
+const companionSockets = new WebSocketServer({ noServer: true, clientTracking: true, maxPayload: 1024, perMessageDeflate: false, handleProtocols: (protocols) => protocols.has('pulse-companion') ? 'pulse-companion' : false });
 const authStates = new Map();
 const overlayTickets = new Map();
 const runtimes = new Map();
@@ -137,6 +139,21 @@ function publish(id, message) {
     if (client.readyState === WebSocket.OPEN && client.tenantId === id) {
       if (client.bufferedAmount > 128 * 1024) { client.close(1013, 'Slow overlay client'); continue; }
       client.send(JSON.stringify(message));
+    }
+  }
+  const tenant = store.get(id); const r = runtimes.get(id);
+  if (tenant && r) {
+    const state = publicState(tenant, r);
+    let safeMessage = { type: 'state', state };
+    if (message.type === 'note') {
+      const event = state.events.find((item) => item.sequence === message.event?.sequence);
+      if (event) safeMessage = { type: 'note', event, state };
+    } else if (message.type === 'clear') safeMessage = { type: 'clear', state };
+    for (const client of companionSockets.clients) {
+      if (client.readyState === WebSocket.OPEN && client.tenantId === id) {
+        if (client.bufferedAmount > 32 * 1024) { client.close(1013, 'Slow companion client'); continue; }
+        client.send(JSON.stringify(safeMessage));
+      }
     }
   }
 }
@@ -283,11 +300,11 @@ async function handleHttp(req, res) {
   }
   if (path.startsWith('/api/')) {
     if (req.method !== 'GET' && !requireOrigin(req, res)) return;
-    try { return await api(req, res, path); }
+    try { return await api(req, res, path, url); }
     catch (error) { return send(res, error.status || 400, { error: String(error.message || 'Request failed.').slice(0, 220) }); }
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, { error: 'Method not allowed.' });
-  let file = path === '/' || path === '/dashboard' ? 'index.html' : path === '/overlay' ? 'overlay.html' : path.slice(1);
+  let file = path === '/' || path === '/dashboard' ? 'index.html' : path === '/overlay' ? 'overlay.html' : path === '/companion' ? 'companion.html' : path.slice(1);
   if (!file || file.includes('..') || file.includes('\\') || file.includes('\0')) return send(res, 404, 'Not found.');
   const absolute = resolve(root, file);
   if (!absolute.startsWith(root + sep)) return send(res, 404, 'Not found.');
@@ -299,12 +316,20 @@ async function handleHttp(req, res) {
   } catch { send(res, 404, 'Not found.'); }
 }
 
-async function api(req, res, path) {
+async function api(req, res, path, url) {
   if (req.method === 'GET' && path === '/api/me') {
     const id = sessionId(req); const t = id && store.get(id);
     const response = { connected: !!t, owner: t?.owner || null, state: t ? viewState(id) : null, overlayReady: !!t?.overlayHash };
     if (!id && signedSessionNeedsReauth(req)) response.reauthorizationRequired = true;
     return send(res, 200, response);
+  }
+  if (req.method === 'GET' && path === '/api/public/state') {
+    const login = normalizeChannelLogin(url.searchParams.get('channel'));
+    if (!login) return send(res, 400, { error: 'Enter a valid Twitch channel name.' });
+    const id = store.list().find((tenantId) => normalizeChannelLogin(store.get(tenantId)?.owner?.login) === login);
+    const tenant = id && store.get(id);
+    if (!tenant) return send(res, 404, { error: 'That channel is not connected to Pulse Choir.' });
+    return send(res, 200, publicState(tenant, runtime(id)));
   }
   if (req.method === 'POST' && path === '/api/overlay/exchange') {
     const body = await readJson(req); const key = body?.key;
@@ -364,8 +389,22 @@ server.on('upgrade', (req, socket, head) => {
   socket.on('error', () => {});
   let url;
   try { url = new URL(req.url, config.origin); } catch { socket.destroy(); return; }
-  if (url.pathname !== '/live' || req.headers.origin !== config.origin) { socket.destroy(); return; }
+  if (req.headers.origin !== config.origin) { socket.destroy(); return; }
   const offered = String(req.headers['sec-websocket-protocol'] || '').split(',').map((part) => part.trim());
+  if (url.pathname === '/companion-live' && offered.includes('pulse-companion')) {
+    const login = normalizeChannelLogin(url.searchParams.get('channel'));
+    const id = login && store.list().find((tenantId) => normalizeChannelLogin(store.get(tenantId)?.owner?.login) === login);
+    if (!id) { socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n'); socket.destroy(); return; }
+    const tenantSockets = [...companionSockets.clients].filter((client) => client.tenantId === id).length;
+    if (tenantSockets >= 50 || companionSockets.clients.size >= 5000) { socket.write('HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\n'); socket.destroy(); return; }
+    companionSockets.handleUpgrade(req, socket, head, (client) => {
+      client.tenantId = id; client.on('error', () => {});
+      client.on('message', () => client.close(1008, 'Companion is read-only'));
+      client.send(JSON.stringify({ type: 'state', state: publicState(store.get(id), runtime(id)) }));
+    });
+    return;
+  }
+  if (url.pathname !== '/live') { socket.destroy(); return; }
   const credential = offered.find((part) => part.startsWith('pulse-ticket.'));
   const hash = credential?.slice('pulse-ticket.'.length);
   if (!offered.includes('pulse-overlay')) { socket.write('HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n'); socket.destroy(); return; }
@@ -404,6 +443,7 @@ async function shutdown() {
   for (const timer of validationTimers.values()) clearTimeout(timer);
   for (const client of eventClients.values()) client.close();
   for (const client of overlaySockets.clients) client.close(1001, 'Server shutting down');
+  for (const client of companionSockets.clients) client.close(1001, 'Server shutting down');
   await store.persist(); server.close(() => process.exit(0));
   setTimeout(() => process.exit(1), 5000).unref();
 }

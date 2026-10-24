@@ -33,6 +33,8 @@ function updateState(state) {
   $('#overlay-tempo').textContent = `${settings.tempo} BPM`;
   $('#overlay-scale').textContent = `${settings.key} ${settings.scale} · octave ${settings.octave}`;
   $('#overlay-count').textContent = `${state.sequence || 0} ${state.sequence === 1 ? 'note' : 'notes'}`;
+  const lastEvent = state.events?.at(-1);
+  if (lastEvent) updateBeatDisplay(lastEvent);
   $('#beat-ring').classList.toggle('is-paused', !state.running);
   manuallyMuted = !!state.muted;
   if (!state.running || manuallyMuted) cancelScheduledNotes();
@@ -57,9 +59,19 @@ function addVisual(event) {
   lane.append(chip); while (lane.children.length > 9) lane.firstElementChild.remove();
   const message = event.kind === 'note' ? `Degree ${event.degree} · ${event.label}` : 'A rhythm tap';
   $('#overlay-note').textContent = message;
-  $('#overlay-command').textContent = `Beat ${event.sequence} · shared note`;
-  $('#beat-ring').classList.remove('strike'); void $('#beat-ring').offsetWidth; $('#beat-ring').classList.add('strike');
-  window.setTimeout(() => $('#beat-ring').classList.remove('strike'), 450);
+  $('#overlay-command').textContent = `Contribution ${event.sequence} · shared composition`;
+  updateBeatDisplay(event);
+}
+function updateBeatDisplay(event) {
+  const beat = event.beatInBar;
+  if (!Number.isInteger(beat) || beat < 1 || beat > 4) { $('#overlay-beat-summary').textContent = 'A note was accepted; its beat position is unavailable.'; return; }
+  for (const cell of $('#beat-sequence').children) {
+    const active = Number(cell.dataset.beat) === beat;
+    cell.dataset.active = String(active);
+    cell.querySelector('small').textContent = active ? 'Last note' : '';
+  }
+  const note = event.kind === 'clap' ? 'Rhythm tap' : `Degree ${event.degree}, ${event.label}`;
+  $('#overlay-beat-summary').textContent = `${note} · beat ${beat} of 4`;
 }
 function playTone(event) {
   if (!context || context.state !== 'running' || manuallyMuted || !settings || !event.beatAt) return;
@@ -119,7 +131,7 @@ async function connectOverlay() {
     let payload; try { payload = JSON.parse(message.data); } catch { return; }
     if (payload.type === 'state') { lastState = payload.state; updateState(payload.state); }
     else if (payload.type === 'note') { lastState = payload.state; updateState(payload.state); eventMessage(payload.event); }
-    else if (payload.type === 'clear') { lastState = payload.state; cancelScheduledNotes(); updateState(payload.state); $('#visual-notes').replaceChildren(); $('#overlay-note').textContent = 'Waiting for the first note'; }
+    else if (payload.type === 'clear') { lastState = payload.state; cancelScheduledNotes(); updateState(payload.state); $('#visual-notes').replaceChildren(); $('#overlay-note').textContent = 'Waiting for the first note'; $('#overlay-command').textContent = 'Chat can play !pulse 1 through !pulse 7'; $('#overlay-beat-summary').textContent = 'No accepted notes yet.'; for (const cell of $('#beat-sequence').children) { cell.dataset.active = 'false'; cell.querySelector('small').textContent = ''; } }
   });
   socket.addEventListener('error', () => showGate('reconnecting', 'The Pulse Choir connection was interrupted.', 'Reconnecting to the private channel state.'));
   socket.addEventListener('close', (event) => {

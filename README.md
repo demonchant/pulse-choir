@@ -1,12 +1,12 @@
 # Pulse Choir
 
-Pulse Choir turns a Twitch channel’s live chat into a shared, beat-aligned instrument. A streamer connects Twitch, picks a tempo/key/scale and participation limit, then adds a private browser source to OBS. Viewers type `!pulse 1` through `!pulse 7` to contribute a scale degree, or `!pulse clap` for a short rhythm tone. Pulse Choir validates real EventSub chat, applies per-viewer and global limits, schedules accepted notes on the next shared beat, and renders original Web Audio tones in the overlay.
+Pulse Choir turns a Twitch channel’s live chat into a shared, beat-aligned instrument. A streamer connects Twitch, picks a tempo/key/scale and participation limit, then adds a private browser source to OBS. Viewers type `!pulse 1` through `!pulse 7` to contribute a scale degree, or `!pulse clap` for a short rhythm tone. Pulse Choir validates real EventSub chat, applies per-viewer and global limits, schedules accepted notes on the next shared beat, and renders original Web Audio tones in the overlay. A separate public companion provides a text rhythm display and paced screen-reader announcements without playing audio.
 
 **No AI in the product.** Pulse Choir uses deterministic rules and Web Audio synthesis. OpenAI Codex was used as the required development tool for research, implementation, and engineering review; it is not a runtime dependency. There are no model APIs, model keys, or model costs.
 
 ## Current verification status
 
-The implementation and offline verification are present. The official Twitch EventSub WebSocket endpoint returned a real `session_welcome` in a narrow Node.js 24 probe. That probe did not authorize a subscription or receive a chat event. Real Twitch OAuth/chat-to-overlay behavior, OBS audio, public hosting, Docker build/boot, and the browser suite are not verified. The service requires real Twitch app credentials and a broadcaster's consent; it fails closed when config is absent. No mock chat or fake connected state is used.
+The implementation and offline verification are present. The official Twitch EventSub WebSocket endpoint returned a real `session_welcome` in a narrow Node.js 24 probe. That probe did not authorize a subscription or receive a chat event. The local Playwright suite passed 10 checks against the real local backend in Edge, using only disconnected/error states. Real Twitch OAuth/chat-to-overlay behavior, OBS audio, public hosting, Docker build/boot, the containerized browser gate, and screen-reader testing are not verified. The service requires real Twitch app credentials and a broadcaster's consent; it fails closed when config is absent. No mock chat or fake connected state is used.
 
 No public deployment URL or recorded demo is available yet.
 
@@ -29,7 +29,11 @@ Requirements: Node.js 24.x; a Twitch Developer application; a broadcaster Twitch
 4. Visit the configured `APP_ORIGIN`, choose **Connect your channel**, and authorize `user:read:chat`. Add a Browser Source using the private URL from the dashboard. In OBS, use the source's **Interact** button and enable sound. Browser audio may require that one-time user gesture; the overlay reports whether audio is enabled.
 5. Send a real Twitch chat command such as `!pulse 1`. A note appears and its generated tone is scheduled on the shared beat. Pause, mute, clear, and settings affect the real channel state.
 
-Without valid app credentials or broadcaster authorization, the app does not pretend that the Twitch integration is connected. Viewers use normal Twitch chat and do not create a Pulse Choir account or install an extension.
+Without valid app credentials or broadcaster authorization, the app does not pretend that the Twitch integration is connected. Viewers use normal Twitch chat and do not create a Pulse Choir account or install an extension. The streamer dashboard provides a separate `/companion?channel=<login>` link to share with viewers. That public companion shows accepted note labels, musical settings, connection state and beat position; it intentionally omits viewer names, raw chat text and Twitch event IDs. It does not play audio.
+
+## Accessibility scope
+
+The OBS visualizer uses note and state labels plus a four-beat position marker; it does not depend on color alone and has no flashing effects. Deaf and hard-of-hearing viewers can follow those visible labels in the stream. Blind and low-vision viewers can use the separate text companion with semantic headings, labeled controls, keyboard focus, adjustable text size, high contrast, reduced motion, and user-configurable polite announcements. Nonspeaking viewers can participate through text chat. The OBS graphic inside Twitch video is not screen-reader accessible to viewers, and Pulse Choir does not claim to make the rest of a stream accessible. These are design and implementation claims only; no screen-reader/browser combination or disabled-user validation was completed in this build.
 
 ### Configuration
 

@@ -42,11 +42,28 @@ after(async () => {
 
 test('health and static product routes are real HTTP responses with no fabricated connection', async () => {
   const health = await fetch(`${base}/healthz`); assert.equal(health.status, 200); assert.deepEqual(await health.json(), { ok: true, service: 'pulse-choir', configured: true });
-  const [home, dashboard, overlay, icon] = await Promise.all(['/','/dashboard','/overlay','/favicon.svg'].map((path) => fetch(`${base}${path}`)));
+  const [home, dashboard, overlay, companion, icon] = await Promise.all(['/','/dashboard','/overlay','/companion','/favicon.svg'].map((path) => fetch(`${base}${path}`)));
   assert.equal(home.status, 200); assert.match(await home.text(), /One chat\./);
-  assert.equal(dashboard.status, 200); assert.equal(overlay.status, 200); assert.equal(icon.status, 200);
+  assert.equal(dashboard.status, 200); assert.equal(overlay.status, 200); assert.equal(companion.status, 200); assert.match(await companion.text(), /screen-reader-friendly text view/); assert.equal(icon.status, 200);
   const me = await (await fetch(`${base}/api/me`)).json();
   assert.deepEqual(me, { connected: false, owner: null, state: null, overlayReady: false });
+});
+
+test('public companion returns no success state for invalid or unconnected channels', async () => {
+  assert.equal((await fetch(`${base}/api/public/state?channel=not%20a%20channel`)).status, 400);
+  const missing = await fetch(`${base}/api/public/state?channel=notconnected`);
+  assert.equal(missing.status, 404); assert.match((await missing.json()).error, /not connected/);
+});
+
+test('public companion WebSocket cannot bind to an unconnected channel', async () => {
+  const result = await new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://localhost:${port}/companion-live?channel=notconnected`, ['pulse-companion'], { headers: { Origin: origin }, handshakeTimeout: 2000 });
+    const timer = setTimeout(() => { ws.terminate(); reject(new Error('Unknown companion channel handshake did not fail.')); }, 3000);
+    ws.on('unexpected-response', (_request, response) => { clearTimeout(timer); response.resume(); resolve(response.statusCode); });
+    ws.on('open', () => { clearTimeout(timer); ws.close(); reject(new Error('Public companion attached to an unconnected channel.')); });
+    ws.on('error', () => {});
+  });
+  assert.equal(result, 404);
 });
 
 test('OAuth redirect requests only chat read scope; state is browser-bound, one-use, and denial is visible', async () => {

@@ -29,7 +29,7 @@ test('chat acceptance enforces tenant, audience, per-viewer cooldown and message
   const cooldowns = new Map(); const limiter = new TokenBucket({ capacity: 20, periodMs: 10_000 });
   const tenant = { owner: { id: '100' }, settings, sequence: 1, beatOrigin: 0 };
   const good = acceptChatMessage({ tenant, event: event('200'), eventId: 'm1', now: 2000, cooldowns, globalLimiter: limiter });
-  assert.equal(good.accepted, true); assert.equal(good.event.sequence, 2); assert.equal(good.event.label, 'C4');
+  assert.equal(good.accepted, true); assert.equal(good.event.sequence, 2); assert.equal(good.event.label, 'C4'); assert.equal(good.event.beatInBar, 1);
   assert.equal(acceptChatMessage({ tenant, event: event('200'), eventId: 'm2', now: 2500, cooldowns, globalLimiter: limiter }).reason, 'cooldown');
   assert.equal(acceptChatMessage({ tenant, event: event('300', '!pulse 1', { broadcaster_user_id: '999' }), eventId: 'm3', now: 4000, cooldowns, globalLimiter: limiter }).reason, 'invalid_event');
   assert.equal(acceptChatMessage({ tenant, event: event('not-numeric'), eventId: 'm4', now: 4000, cooldowns, globalLimiter: limiter }).reason, 'invalid_event');

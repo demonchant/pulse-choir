@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 export function loadConfig(env = process.env) {
   const required = ['TWITCH_CLIENT_ID', 'TWITCH_CLIENT_SECRET', 'TWITCH_REDIRECT_URI', 'APP_ORIGIN', 'SESSION_SECRET', 'TOKEN_ENCRYPTION_KEY'];
   const missing = required.filter((name) => !env[name]?.trim());
-  if (missing.length) throw new Error(`Missing required configuration: ${missing.join(', ')}. Copy .env.example to .env.pulse-choir and register the Twitch redirect URI.`);
+  if (missing.length) throw new Error(`Missing required configuration: ${missing.join(', ')}. Set these values in .env.pulse-choir using the README Configuration table, then register the Twitch redirect URI.`);
   const origin = new URL(env.APP_ORIGIN);
   const redirect = new URL(env.TWITCH_REDIRECT_URI);
   if (!['http:', 'https:'].includes(origin.protocol) || origin.pathname !== '/' || origin.search || origin.hash) throw new Error('APP_ORIGIN must be an absolute origin without path, query, or fragment.');

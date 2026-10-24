@@ -1,1 +1,10 @@
-.beat-ring.is-paused .beat-dot{animation-play-state:paused}.beat-ring.strike .ring-inner{animation:ring-strike .42s ease-out}.beat-ring.strike .ring-core{box-shadow:0 0 48px #d9fb7266}@keyframes ring-strike{0%{transform:scale(.82);opacity:.25}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:.75}}@media(prefers-reduced-motion:reduce){.beat-ring.strike .ring-inner{animation:none}}
+﻿/* Static labels and shape cues keep the broadcast readable without sound or color alone. */
+.beat-dot{display:none!important}
+.beat-ring.strike .ring-inner,.beat-ring.strike .ring-core{animation:none!important;box-shadow:none}
+.viz-note{animation:none!important}
+.beat-sequence{list-style:none;padding:0;margin:12px auto 4px;display:grid;grid-template-columns:repeat(4,minmax(54px,84px));justify-content:center;gap:8px}
+.beat-sequence li{min-height:36px;border:1px solid #aaa0aa;padding:4px 3px;display:flex;align-items:center;justify-content:center;gap:3px;flex-direction:column;color:#f6f0e9;font:9px system-ui,sans-serif}
+.beat-sequence li[data-active=true]{outline:2px solid #fff37a;outline-offset:1px;border-width:2px;font-weight:700}
+.beat-sequence small{min-height:1em;color:#fff37a;font:700 8px system-ui,sans-serif}
+#overlay-beat-summary{min-height:1.4em;margin:4px 0;color:#fff;font:11px system-ui,sans-serif}
+@media(prefers-reduced-motion:reduce){.beat-dot,.beat-ring.strike .ring-inner,.viz-note{animation:none!important}}

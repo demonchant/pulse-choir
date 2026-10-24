@@ -36,7 +36,8 @@ export function acceptChatMessage({ tenant, event, eventId, now, cooldowns, glob
   cooldowns.set(event.chatter_user_id, now);
   const mapped = mapNote(command, tenant.settings);
   const beatAt = nextBeat(now, tenant.settings.tempo, tenant.beatOrigin || now);
-  const acceptedEvent = { id: eventId, sequence: tenant.sequence + 1, beatAt, receivedAt: now, ...mapped };
+  const beatNumber = Math.round((beatAt - (tenant.beatOrigin || now)) / (60_000 / tenant.settings.tempo));
+  const acceptedEvent = { id: eventId, sequence: tenant.sequence + 1, beatAt, beatInBar: ((beatNumber - 1 + 4000) % 4) + 1, receivedAt: now, ...mapped };
   return { accepted: true, event: acceptedEvent };
 }
 
