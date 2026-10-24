@@ -1,0 +1,21 @@
+# Credentials, local stores, and private planning/evidence are never published.
+.env
+.env.*
+.env.example
+.env.pulse-choir
+data/
+*.sqlite*
+*.json.tmp
+docs/
+evidence/
+BUILD_LOG.md
+HACKATHON_BUILD_STANDARD_V2.md
+HACKATHON_REBUILD_PLAYBOOK.md
+node_modules/
+playwright-report/
+test-results/
+artifacts/
+coverage/
+dist/
+*.log
+.DS_Store

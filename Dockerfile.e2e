@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/playwright:v1.64.0-noble
+WORKDIR /work
+COPY --chown=pwuser:pwuser e2e/package.json e2e/package-lock.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+COPY --chown=pwuser:pwuser playwright.config.js ./playwright.config.js
+COPY --chown=pwuser:pwuser e2e ./e2e
+USER pwuser
+CMD ["npx", "playwright", "test", "--config=playwright.config.js"]

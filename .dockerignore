@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+data
+docs
+evidence
+BUILD_LOG.md
+HACKATHON_BUILD_STANDARD_V2.md
+HACKATHON_REBUILD_PLAYBOOK.md
+node_modules
+playwright-report
+test-results
+artifacts
+coverage
+*.log

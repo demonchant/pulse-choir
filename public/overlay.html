@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111013">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>Pulse Choir — OBS visualizer</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/overlay.css">
+  <script src="/overlay.js" defer></script>
+</head>
+<body class="overlay-body">
+  <main class="overlay-shell">
+    <header class="overlay-header"><a class="brand" href="/" aria-label="Pulse Choir"><span class="brand-mark">◉</span><span>pulse<span class="brand-soft">choir</span></span></a><span class="overlay-pill"><i id="overlay-dot"></i><span id="overlay-status">Connecting</span></span></header>
+    <section class="overlay-score" aria-label="Pulse Choir live visualization">
+      <p class="eyebrow" id="overlay-channel">COMMUNITY INSTRUMENT</p>
+      <div class="beat-ring" id="beat-ring" aria-hidden="true"><span class="ring ring-outer"></span><span class="ring ring-inner"></span><div class="ring-core"><span id="overlay-key">—</span><small id="overlay-tempo">— BPM</small></div><span class="beat-dot"></span></div>
+      <h1 id="overlay-note">Waiting for the first note</h1>
+      <p id="overlay-command">Chat can play <code>!pulse 1</code> through <code>!pulse 7</code></p>
+      <div class="visual-notes" id="visual-notes" aria-label="Recent accepted notes"></div>
+      <div class="overlay-meta"><span id="overlay-scale">Scale unavailable</span><span id="overlay-count">0 notes</span></div>
+    </section>
+    <section class="overlay-gate" id="overlay-gate"><p id="gate-message">This private source needs a valid Pulse Choir link.</p><button id="enable-audio" class="button button-primary" type="button" hidden>Enable sound <span aria-hidden="true">♫</span></button><p class="gate-help" id="gate-help">Add the private URL from your streamer dashboard.</p></section>
+    <p class="overlay-foot">A shared beat, made by chat <span>·</span> <span id="overlay-audio-state">Audio not enabled</span></p>
+  </main>
+</body>
+</html>

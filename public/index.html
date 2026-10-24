@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111013">
+  <meta name="description" content="Turn your Twitch chat into one shared, beat-aligned instrument.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>Pulse Choir — chat plays together</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Pulse Choir home"><span class="brand-mark" aria-hidden="true">◉</span><span>pulse<span class="brand-soft">choir</span></span></a>
+    <a class="top-link" href="#how">How it works <span aria-hidden="true">↘</span></a>
+    <a class="button button-small button-quiet" href="/auth/twitch" id="nav-connect">Connect Twitch <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero" id="landing">
+      <div class="hero-copy">
+        <p class="eyebrow">A shared instrument for live chat</p>
+        <h1>One chat.<br><span class="serif-accent">One pulse.</span></h1>
+        <p class="hero-lede">Your viewers send a note. Together, they make the music. Pulse Choir turns Twitch chat into a little instrument everyone can play.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="/auth/twitch" id="hero-connect">Connect your channel <span aria-hidden="true">↗</span></a>
+          <a class="text-link" href="#how">See how it works <span aria-hidden="true">↓</span></a>
+        </div>
+        <p class="micro-copy">No viewer sign-up. No extension. Just chat.</p>
+      </div>
+      <div class="hero-art" aria-label="Abstract notation showing notes joining a shared beat">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="staff-line staff-a"></div><div class="staff-line staff-b"></div><div class="staff-line staff-c"></div>
+        <span class="note note-a">♪</span><span class="note note-b">♩</span><span class="note note-c">♫</span><span class="note note-d">♬</span>
+        <span class="pulse-core"><i></i><i></i><i></i></span>
+        <span class="art-caption">PLAY TOGETHER&nbsp; · &nbsp;STAY IN KEY</span>
+      </div>
+      <div class="hero-bottom"><span>MADE FOR THE MOMENTS BETWEEN MATCHES</span><span>01 / CHAT → BEAT → CHOIR</span></div>
+    </section>
+
+    <section class="how section-wrap" id="how">
+      <div class="section-heading"><p class="eyebrow">A tiny command. A shared sound.</p><h2>Music made <span class="serif-accent">in the moment.</span></h2><p>Every note lands on the same beat and in the same scale. The chat makes a composition, not a playlist.</p></div>
+      <div class="steps">
+        <article class="step"><span class="step-index">01</span><div class="step-icon" aria-hidden="true">⌁</div><h3>Set the room</h3><p>Connect Twitch, choose a tempo and key, then add the private visualizer to OBS.</p></article>
+        <article class="step"><span class="step-index">02</span><div class="step-icon step-chat" aria-hidden="true">!1</div><h3>Let chat play</h3><p>Viewers send <code>!pulse 1</code> through <code>!pulse 7</code>. Each degree becomes a note in your scale.</p></article>
+        <article class="step"><span class="step-index">03</span><div class="step-icon step-wave" aria-hidden="true">∿</div><h3>Hear it together</h3><p>The notes line up on a shared beat. Original tones are synthesized in the browser source.</p></article>
+      </div>
+    </section>
+
+    <section class="command-band"><div><p class="eyebrow">The whole command sheet</p><h2>Easy to join.<br><span class="serif-accent">Hard to get wrong.</span></h2></div><div class="command-list"><div><code>!pulse 1</code><span>Do · your first note</span></div><div><code>!pulse 2–7</code><span>Re through Ti · more notes</span></div><div><code>!pulse clap</code><span>A little rhythmic tap</span></div><p>One contribution every 1.8 seconds per viewer. The streamer can limit play to subscribers or moderators.</p></div></section>
+
+    <section class="promise section-wrap"><div class="promise-tag">THE PULSE CHOIR DIFFERENCE</div><div><h2>Not a song request.<br><span class="serif-accent">A song made by chat.</span></h2><p>No imported tracks, clips or samples. Each contribution is a short, original tone, mapped by a deterministic rule and played on the shared beat.</p></div><div class="promise-stamp" aria-hidden="true"><span>ORIGINAL<br>SOUND</span><b>♪</b></div></section>
+
+    <section class="closing-cta"><p class="eyebrow">Your chat already has a rhythm.</p><h2>Give it a key.</h2><a class="button button-primary" href="/auth/twitch" id="footer-connect">Connect with Twitch <span aria-hidden="true">↗</span></a><p id="landing-status" class="status-text" role="status" aria-live="polite"></p></section>
+
+    <section class="dashboard section-wrap" id="dashboard" hidden>
+      <div class="dashboard-heading"><div><p class="eyebrow">YOUR CHANNEL · PULSE CONTROL</p><h2>Shape the <span class="serif-accent">sound.</span></h2></div><div class="channel-chip"><span class="live-dot" id="connection-dot"></span><span id="channel-name">Loading channel…</span></div></div>
+      <div class="control-layout">
+        <form id="settings-form" class="settings-card">
+          <div class="card-head"><div><p class="eyebrow">01 / MUSICAL SETTINGS</p><h3>Tune your room</h3></div><span class="card-symbol">♩</span></div>
+          <div class="control-grid">
+            <label>Tempo <span class="field-unit">BPM</span><input name="tempo" type="number" min="60" max="180" step="1" required></label>
+            <label>Key<select name="key"><option>C</option><option>C#</option><option>D</option><option>Eb</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>Ab</option><option>A</option><option>Bb</option><option>B</option></select></label>
+            <label>Scale<select name="scale"><option value="major">Major</option><option value="minor">Minor</option><option value="pentatonic">Pentatonic</option></select></label>
+            <label>Octave<select name="octave"><option value="2">Low · 2</option><option value="3">3</option><option value="4">4</option><option value="5">High · 5</option></select></label>
+            <label class="range-label">Sound level <output id="volume-value">55%</output><input name="volume" type="range" min="0" max="100" step="1"></label>
+            <label>Who can play?<select name="audience"><option value="everyone">Everyone</option><option value="subs">Subscribers</option><option value="mods">Moderators only</option></select></label>
+          </div>
+          <div class="card-actions"><button class="button button-primary" type="submit">Save sound <span aria-hidden="true">↗</span></button><span class="action-feedback" id="settings-feedback" role="status" aria-live="polite"></span></div>
+        </form>
+        <aside class="live-card">
+          <div class="card-head"><div><p class="eyebrow">02 / THE SESSION</p><h3>Choir status</h3></div><span class="session-state" id="session-state">CHECKING</span></div>
+          <p class="connection-detail" id="connection-detail">Checking the Twitch connection…</p>
+          <div class="session-meta"><span>Accepted notes</span><strong id="accepted-count">0</strong></div>
+          <div class="session-meta"><span>Sound</span><strong id="sound-state">Ready in OBS</strong></div>
+          <div class="transport-controls"><button class="button button-small" id="toggle-running" type="button">Pause choir</button><button class="button button-small button-quiet" id="toggle-mute" type="button">Mute sound</button><button class="button button-small button-quiet" id="clear-notes" type="button">Clear notes</button></div>
+          <p class="action-feedback" id="control-feedback" role="status" aria-live="polite"></p>
+        </aside>
+      </div>
+      <div class="lower-grid">
+        <section class="activity-card"><div class="card-head"><div><p class="eyebrow">03 / THE COMPOSITION</p><h3>Notes on the beat</h3></div><span class="activity-hint">REAL ACCEPTED CHAT ONLY</span></div><div class="note-lane" id="note-lane"><div class="empty-note"><span aria-hidden="true">∿</span><p>No notes yet</p><small>When a viewer plays, it will appear here.</small></div></div></section>
+        <section class="overlay-card"><div class="card-head"><div><p class="eyebrow">04 / STREAM SETUP</p><h3>Bring it to OBS</h3></div><span class="card-symbol">↗</span></div><ol class="setup-list"><li><span>1</span>Generate a private browser-source link.</li><li><span>2</span>In OBS, add a Browser Source and paste it.</li><li><span>3</span>Use the source's <b>Interact</b> button to enable audio once.</li></ol><button class="button button-primary" id="create-overlay" type="button">Create private source link <span aria-hidden="true">↗</span></button><div id="overlay-result" class="overlay-result" hidden><label for="overlay-url">Private OBS source URL</label><div class="copy-row"><input id="overlay-url" readonly><button class="button button-small" id="copy-overlay" type="button">Copy</button></div><p>Treat this URL like a password. Generate another to revoke this one.</p></div><p class="action-feedback" id="overlay-feedback" role="status" aria-live="polite"></p></section>
+      </div>
+      <div class="dashboard-foot"><p>Commands: <code>!pulse 1–7</code> for a note · <code>!pulse clap</code> for a beat</p><button id="disconnect" class="text-button" type="button">Disconnect Twitch and revoke access</button></div>
+    </section>
+  </main>
+
+  <footer class="footer"><a class="brand" href="/">◉&nbsp; pulse<span class="brand-soft">choir</span></a><span>Made for the chat that makes the stream.</span><a href="https://dev.twitch.tv/docs/eventsub/" target="_blank" rel="noreferrer">Twitch EventSub <span aria-hidden="true">↗</span></a></footer>
+</body>
+</html>
