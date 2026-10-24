@@ -4,6 +4,8 @@ Pulse Choir turns a Twitch channel’s live chat into a shared, beat-aligned ins
 
 **No AI in the product.** Pulse Choir uses deterministic rules and Web Audio synthesis. OpenAI Codex was used as the required development tool for research, implementation, and engineering review; it is not a runtime dependency. There are no model APIs, model keys, or model costs.
 
+**Codex build session ID:** `01a16f4e-9f7c-79f2-87d9-6cbb0c5ef989`
+
 ## Current verification status
 
 The implementation and offline verification are present. The official Twitch EventSub WebSocket endpoint returned a real `session_welcome` in a narrow Node.js 24 probe. That probe did not authorize a subscription or receive a chat event. The local Playwright suite passed 10 checks against the real local backend in Edge, using only disconnected/error states. Real Twitch OAuth/chat-to-overlay behavior, OBS audio, public hosting, Docker build/boot, the containerized browser gate, and screen-reader testing are not verified. The service requires real Twitch app credentials and a broadcaster's consent; it fails closed when config is absent. No mock chat or fake connected state is used.
