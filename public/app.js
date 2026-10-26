@@ -1,9 +1,10 @@
 const $ = (selector) => document.querySelector(selector);
-const landing = $('#landing');
+const publicLanding = $('#public-landing');
 const dashboard = $('#dashboard');
 const landingStatus = $('#landing-status');
 let latestState = null;
 let pollTimer = null;
+let overlayReady = false;
 
 function feedback(node, message, error = false) {
   node.textContent = message;
@@ -53,18 +54,42 @@ function renderState(state) {
   for (const name of ['tempo', 'key', 'scale', 'octave', 'volume', 'audience']) if (document.activeElement !== form.elements[name]) form.elements[name].value = state.settings[name];
   $('#volume-value').textContent = `${state.settings.volume}%`;
   renderEvents(state.events);
+  const connectionLabel = (state.connection?.state || 'unknown').replaceAll('_', ' ');
+  $('#overview-connection').textContent = connectionLabel.replace(/\b\w/g, (letter) => letter.toUpperCase());
+  $('#overview-connection-detail').textContent = state.connection?.detail || 'Twitch connection detail is unavailable.';
+  $('#overview-running').textContent = state.running ? 'Accepting commands' : 'Paused';
+  $('#overview-running-detail').textContent = state.running ? 'Valid viewer commands can join the next beat.' : 'Viewer commands are ignored until you start the choir.';
+  $('#overview-count').textContent = String(state.sequence || 0);
+  $('#overview-overlay').textContent = overlayReady ? 'Private link created' : 'Not created';
+  $('#overview-overlay-detail').textContent = overlayReady ? 'Add the private URL below as an OBS Browser Source.' : 'Create a private browser-source URL in Stream Setup.';
+  const audience = { everyone: 'Everyone', subs: 'Subscribers + moderators', mods: 'Moderators only' };
+  $('#overview-settings').textContent = `${state.settings.key} ${state.settings.scale} · ${state.settings.tempo} BPM · octave ${state.settings.octave} · ${state.settings.volume}%`;
+  $('#overview-audience').textContent = audience[state.settings.audience] || 'Unavailable';
+  const latest = state.events?.at(-1);
+  $('#overview-latest').textContent = latest ? `${latest.label} · beat ${latest.beatInBar || '—'} · sequence ${latest.sequence}` : 'No accepted commands yet';
+  $('#overview-freshness').textContent = state.serverNow ? `Live status · ${new Date(state.serverNow).toLocaleTimeString()}` : 'Live status received';
+  $('#handoff-connect').classList.add('is-done');
+  $('#handoff-source').classList.toggle('is-done', overlayReady);
+  $('#handoff-source-copy').textContent = overlayReady ? 'Private link created. Add it as an OBS Browser Source and enable audio in Interact.' : 'Create a private link below, then add it as an OBS Browser Source.';
+  $('#handoff-chat').classList.toggle('is-done', (state.sequence || 0) > 0);
+  $('#handoff-chat-copy').textContent = (state.sequence || 0) > 0 ? 'Real accepted chat contributions are reaching this session.' : 'Viewers type !pulse 1–7 or !pulse clap in your Twitch chat.';
 }
 async function loadState() {
   const me = await request('/api/me');
   if (!me.connected) {
-    dashboard.hidden = true; landing.hidden = false;
+    dashboard.hidden = true; publicLanding.hidden = false;
+    $('#nav-connect').hidden = false; $('#nav-how').hidden = false;
     const error = new URLSearchParams(location.search).get('auth_error');
     if (error === 'denied') landingStatus.textContent = 'Twitch authorization was denied. No channel was connected.';
     if (error === 'failed') landingStatus.textContent = 'Twitch connection failed. Check your authorization and try again.';
     if (me.reauthorizationRequired) landingStatus.textContent = 'Twitch authorization expired or was revoked. Connect your channel again to resume.';
     return false;
   }
-  landing.hidden = true; dashboard.hidden = false; renderState(me.state);
+  publicLanding.hidden = true; dashboard.hidden = false;
+  $('#nav-connect').hidden = true; $('#nav-how').hidden = true;
+  document.title = 'Pulse Choir — your channel dashboard';
+  overlayReady = Boolean(me.overlayReady);
+  renderState(me.state);
   const sourceButton = $('#create-overlay');
   sourceButton.textContent = me.overlayReady ? 'Rotate private source link ↗' : 'Create private source link ↗';
   const companionUrl = new URL('/companion', location.origin);
@@ -106,6 +131,8 @@ $('#create-overlay').addEventListener('click', async (event) => {
   try {
     const result = await request('/api/overlay-key', 'POST', {});
     $('#overlay-url').value = result.url; $('#overlay-result').hidden = false;
+    overlayReady = true;
+    if (latestState) renderState(latestState);
     button.textContent = 'Rotate private source link ↗';
     feedback($('#overlay-feedback'), 'New key created. Any previous source link is now revoked.');
     $('#overlay-url').focus();
