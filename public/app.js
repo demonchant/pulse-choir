@@ -64,7 +64,19 @@ async function loadState() {
     if (me.reauthorizationRequired) landingStatus.textContent = 'Twitch authorization expired or was revoked. Connect your channel again to resume.';
     return false;
   }
-  landing.hidden = true; dashboard.hidden = false; renderState(me.state);
+  dashboard.hidden = false;
+  landing.before(dashboard);
+  const connectLink = $('#nav-connect');
+  connectLink.href = '#dashboard';
+  connectLink.textContent = 'Connected to Twitch';
+  connectLink.setAttribute('aria-label', 'Connected to Twitch. Open your channel dashboard.');
+  connectLink.classList.add('is-connected');
+  for (const id of ['hero-connect', 'footer-connect']) {
+    const link = document.getElementById(id);
+    link.href = '#dashboard';
+    link.replaceChildren(document.createTextNode('Open dashboard'));
+  }
+  renderState(me.state);
   const sourceButton = $('#create-overlay');
   sourceButton.textContent = me.overlayReady ? 'Rotate private source link ↗' : 'Create private source link ↗';
   const companionUrl = new URL('/companion', location.origin);
