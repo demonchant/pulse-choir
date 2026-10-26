@@ -33,6 +33,17 @@ Requirements: Node.js 24.x; a Twitch Developer application; a broadcaster Twitch
 
 Without valid app credentials or broadcaster authorization, the app does not pretend that the Twitch integration is connected. Viewers use normal Twitch chat and do not create a Pulse Choir account or install an extension. The streamer dashboard provides a separate `/companion?channel=<login>` link to share with viewers. That public companion shows accepted note labels, musical settings, connection state and beat position; it intentionally omits viewer names, raw chat text and Twitch event IDs. It does not play audio.
 
+## Streamer-to-viewer workflow
+
+1. The streamer opens Pulse Choir and connects the Twitch broadcaster account through Twitch OAuth.
+2. In the dashboard overview, the streamer checks the actual Twitch chat connection, choir running/paused state, accepted contribution count, current room settings, audience rule, and whether a private OBS source link has been created.
+3. The streamer creates the private source URL, adds it to OBS as a Browser Source, and enables browser audio once through OBS **Interact**. The dashboard reports that the private link exists; it cannot detect whether OBS is open or the source is currently visible.
+4. The streamer copies and shares the public accessible companion URL with viewers who want the text-based note and beat display.
+5. A viewer joins the Twitch channel and types `!pulse 1` through `!pulse 7`, or `!pulse clap`, in Twitch chat. They do not need a Pulse Choir account, extension, microphone, or AI service. The server validates the real chat event and participation rule; accepted notes appear in the dashboard, OBS visualizer, and companion.
+6. The streamer can pause/resume the choir, mute/unmute overlay sound, change settings, or clear the visible recent composition from the dashboard.
+
+The dashboard overview is a live summary of backend state. It does not claim that OBS audio is playing or that viewers can hear it; confirm that in OBS during setup.
+
 ## Accessibility scope
 
 The OBS visualizer uses note and state labels plus a four-beat position marker; it does not depend on color alone and has no flashing effects. Deaf and hard-of-hearing viewers can follow those visible labels in the stream. Blind and low-vision viewers can use the separate text companion with semantic headings, labeled controls, keyboard focus, adjustable text size, high contrast, reduced motion, and user-configurable polite announcements. Nonspeaking viewers can participate through text chat. The OBS graphic inside Twitch video is not screen-reader accessible to viewers, and Pulse Choir does not claim to make the rest of a stream accessible. These are design and implementation claims only; no screen-reader/browser combination or disabled-user validation was completed in this build.
@@ -70,4 +81,4 @@ The initial deployment design is one active Node process with a persistent data 
 
 Public deployment requires a provider account, persistent writable storage, TLS/WebSocket support, Twitch app configuration, and server secrets. Current provider choice/cost checks and security setup must be completed before deploying. See official [Twitch Chat](https://dev.twitch.tv/docs/chat/), [OAuth](https://dev.twitch.tv/docs/chat/authenticating), [EventSub](https://dev.twitch.tv/docs/eventsub/), and [EventSub WebSocket handling](https://dev.twitch.tv/docs/eventsub/handling-websocket-events/) documentation.
 
-The local research, evidence index, build log, and hackathon planning records are intentionally excluded from the public submission repository per the build instructions. The actual demo must show a real Twitch message in OBS and include Codex build footage, be public on YouTube, and remain under three minutes. The Devpost entry and external repository push are not authorized or completed in this build thread. Current verified offline results and all live-integration limitations are recorded in the local evidence index before any public repository is prepared.
+The local research, evidence index, build log, Hackathon Build Standard, Hackathon Rebuild Playbook, and generated planning/evidence documents are intentionally excluded from the public repository. This repository has been pushed to GitHub; the Devpost entry has not been submitted. The required public YouTube demo must show a real Twitch message in OBS and Codex build footage, remain under three minutes, and be recorded before submission. Current verified offline results and live-integration limitations remain in the local evidence records.
