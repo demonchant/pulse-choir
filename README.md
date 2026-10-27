@@ -1,5 +1,8 @@
 # Pulse Choir
 
+**Public project repository:** https://github.com/demonchant/pulse-choir  
+**Live public demo:** https://pulse-choir.onrender.com
+
 Pulse Choir turns a Twitch channel’s live chat into a shared, beat-aligned instrument. A streamer connects Twitch, picks a tempo/key/scale and participation limit, then adds a private browser source to OBS. Viewers type `!pulse 1` through `!pulse 7` to contribute a scale degree, or `!pulse clap` for a short rhythm tone. Pulse Choir validates real EventSub chat, applies per-viewer and global limits, schedules accepted notes on the next shared beat, and renders original Web Audio tones in the overlay. A separate public companion provides a text rhythm display and paced screen-reader announcements without playing audio.
 
 **No AI in the product.** Pulse Choir uses deterministic rules and Web Audio synthesis. OpenAI Codex was used as the required development tool for research, implementation, and engineering review; it is not a runtime dependency. There are no model APIs, model keys, or model costs.
@@ -8,9 +11,9 @@ Pulse Choir turns a Twitch channel’s live chat into a shared, beat-aligned ins
 
 ## Current verification status
 
-The implementation and offline verification are present. The official Twitch EventSub WebSocket endpoint returned a real `session_welcome` in a narrow Node.js 24 probe. That probe did not authorize a subscription or receive a chat event. The local Playwright suite passed 10 checks against the real local backend in Edge, using only disconnected/error states. Real Twitch OAuth/chat-to-overlay behavior, OBS audio, public hosting, Docker build/boot, the containerized browser gate, and screen-reader testing are not verified. The service requires real Twitch app credentials and a broadcaster's consent; it fails closed when config is absent. No mock chat or fake connected state is used.
+The implementation and offline verification are present. The official Twitch EventSub WebSocket endpoint returned a real `session_welcome` in a narrow Node.js 24 probe. That probe did not authorize a subscription or receive a chat event. The local Playwright suite passed 10 checks against the real local backend in Edge, using only disconnected/error states. Real Twitch OAuth/chat-to-overlay behavior, OBS audio, complete public deployment behavior, Docker build/boot, the containerized browser gate, and screen-reader testing are not verified. The service requires real Twitch app credentials and a broadcaster's consent; it fails closed when config is absent. No mock chat or fake connected state is used.
 
-No public deployment URL or recorded demo is available yet.
+Live public demo: https://pulse-choir.onrender.com. Public YouTube demonstration (2:50): https://youtu.be/wNyNm7cIf1s. Confirm the live Twitch flow remains available for judges and that they can test it free of charge without restrictions. Full Twitch OAuth/chat behavior, OBS audio, and screen-reader testing are not verified.
 
 ## Run locally
 
@@ -81,4 +84,4 @@ The initial deployment design is one active Node process with a persistent data 
 
 Public deployment requires a provider account, persistent writable storage, TLS/WebSocket support, Twitch app configuration, and server secrets. Current provider choice/cost checks and security setup must be completed before deploying. See official [Twitch Chat](https://dev.twitch.tv/docs/chat/), [OAuth](https://dev.twitch.tv/docs/chat/authenticating), [EventSub](https://dev.twitch.tv/docs/eventsub/), and [EventSub WebSocket handling](https://dev.twitch.tv/docs/eventsub/handling-websocket-events/) documentation.
 
-The local research, evidence index, build log, Hackathon Build Standard, Hackathon Rebuild Playbook, and generated planning/evidence documents are intentionally excluded from the public repository. This repository has been pushed to GitHub; the Devpost entry has not been submitted. The required public YouTube demo must show a real Twitch message in OBS and Codex build footage, remain under three minutes, and be recorded before submission. Current verified offline results and live-integration limitations remain in the local evidence records.
+The local research, evidence index, build log, Hackathon Build Standard, Hackathon Rebuild Playbook, and documents generated from those instructions are intentionally excluded from the public repository. The demo must show a real Twitch message in the running product and include Codex build footage, be public on YouTube, and remain under three minutes. A repository push does not mean that the Devpost entry is submitted. Current verified offline results and live-integration limitations remain recorded in the local evidence records.
