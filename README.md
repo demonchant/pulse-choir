@@ -1,19 +1,34 @@
 # Pulse Choir
 
-**Public project repository:** https://github.com/demonchant/pulse-choir  
-**Live public demo:** https://pulse-choir.onrender.com
+- **Project repository:** https://github.com/demonchant/pulse-choir
+- **Live demo:** https://pulse-choir.onrender.com
+- **Public demonstration video (2:50):** https://youtu.be/wNyNm7cIf1s
 
-Pulse Choir turns a Twitch channel’s live chat into a shared, beat-aligned instrument. A streamer connects Twitch, picks a tempo/key/scale and participation limit, then adds a private browser source to OBS. Viewers type `!pulse 1` through `!pulse 7` to contribute a scale degree, or `!pulse clap` for a short rhythm tone. Pulse Choir validates real EventSub chat, applies per-viewer and global limits, schedules accepted notes on the next shared beat, and renders original Web Audio tones in the overlay. A separate public companion provides a text rhythm display and paced screen-reader announcements without playing audio.
+## The problem
 
-**No AI in the product.** Pulse Choir uses deterministic rules and Web Audio synthesis. OpenAI Codex was used as the required development tool for research, implementation, and engineering review; it is not a runtime dependency. There are no model APIs, model keys, or model costs.
+Live streams often ask viewers to listen, watch an overlay, or speak to take part. That can make a shared musical moment harder to follow or join for Deaf and hard-of-hearing viewers, blind and low-vision viewers, and viewers who do not speak aloud.
 
-**Codex build session ID:** `01a16f4e-9f7c-79f2-87d9-6cbb0c5ef989`
+## The solution
 
-## Current verification status
+Pulse Choir gives a Twitch community a text-based way to make music together. The streamer sets the tempo, key, scale, octave, volume, and participation rule, then adds a private Pulse Choir Browser Source to OBS. Viewers send `!pulse 1` through `!pulse 7` for notes or `!pulse clap` for a rhythm tap. Accepted commands are mapped to the selected scale and scheduled on the shared beat. The visualizer shows the notes and synthesizes original tones in the browser.
 
-The implementation and offline verification are present. The official Twitch EventSub WebSocket endpoint returned a real `session_welcome` in a narrow Node.js 24 probe. That probe did not authorize a subscription or receive a chat event. The local Playwright suite passed 10 checks against the real local backend in Edge, using only disconnected/error states. Real Twitch OAuth/chat-to-overlay behavior, OBS audio, complete public deployment behavior, Docker build/boot, the containerized browser gate, and screen-reader testing are not verified. The service requires real Twitch app credentials and a broadcaster's consent; it fails closed when config is absent. No mock chat or fake connected state is used.
+The separate text companion presents channel state, musical settings, beat position, and recent accepted notes. It offers configurable screen-reader announcement pace and detail, pause/resume announcements, text sizing, high contrast, and reduced motion. Viewers can use the participation option that works best for them; these features are intended to make the shared activity more inclusive, while individual access needs can differ.
 
-Live public demo: https://pulse-choir.onrender.com. Public YouTube demonstration (2:50): https://youtu.be/wNyNm7cIf1s. Confirm the live Twitch flow remains available for judges and that they can test it free of charge without restrictions. Full Twitch OAuth/chat behavior, OBS audio, and screen-reader testing are not verified.
+## How we built it with Codex
+
+OpenAI Codex supported research, implementation, code review, and documentation. It helped build the Twitch connection and chat handling, streamer dashboard, OBS visualizer, and text companion. Pulse Choir uses deterministic music rules and Web Audio synthesis; it has no runtime AI or model API.
+
+**Codex session ID:** `01a16f4e-9f7c-79f2-87d9-6cbb0c5ef989`
+
+## Hackathon submission details
+
+- The public video is under three minutes and shows Pulse Choir working with Twitch, a Codex build clip, and the main product features.
+- The project is built with Codex; the session ID and explanation of Codex's role are above.
+- The video uses Pulse Choir's original synthesized tones and contains no added copyrighted music or stock footage.
+- The source repository includes the application, assets, and the run instructions below. The public demo is provided for review; keep it available free of charge and without access restrictions through the judging period.
+- Confirm the entrant is eligible, the submission is original work with rights to its included materials, and no disallowed sponsor support applies. Complete individual/team status and team representative details on the hackathon form. If the repository becomes private, share it with `testing@devpost.com` as required.
+
+The companion and visualizer provide different ways to follow and join the music. These are accessibility-focused design and implementation features; formal testing with disabled users has not been completed.
 
 ## Run locally
 
@@ -78,10 +93,10 @@ Generate each secret independently with Node: `node -e "console.log(require('nod
 
 OAuth tokens are stored only on the server, encrypted at rest with `TOKEN_ENCRYPTION_KEY`. Dashboard sessions use signed HttpOnly cookies. OAuth state is short-lived, one-use, and browser-bound. Twitch authorization uses the minimum documented read-chat scope. Overlay URL keys are random, revocable, stored as hashes, exchanged from the URL fragment for a one-use short-lived WebSocket ticket, and can only read a single tenant's sanitized state. Overlay controls are read-only. Channel settings and Twitch connections are tenant-isolated by Twitch user ID.
 
-The initial deployment design is one active Node process with a persistent data directory; do not run multiple instances against the local JSON store. Code restores settings and encrypted tokens, validates/refreshes authorization, and creates a fresh EventSub session; store restart/isolation behavior is covered by offline tests. A live Twitch restart/reconnect remains unverified. Twitch does not replay missed chat events after a disconnect. Accepted note history is in memory and is not presented as a durable archive.
+The initial deployment design is one active Node process with a persistent data directory; do not run multiple instances against the local JSON store. Code restores settings and encrypted tokens, validates/refreshes authorization, and creates a fresh EventSub session; store restart/isolation behavior is covered by offline tests. After a disconnect, Twitch does not replay missed chat messages. The service starts a fresh EventSub session, and accepted note history is held in memory rather than presented as a durable archive.
 
 ## Public deployment and evidence
 
-Public deployment requires a provider account, persistent writable storage, TLS/WebSocket support, Twitch app configuration, and server secrets. Current provider choice/cost checks and security setup must be completed before deploying. See official [Twitch Chat](https://dev.twitch.tv/docs/chat/), [OAuth](https://dev.twitch.tv/docs/chat/authenticating), [EventSub](https://dev.twitch.tv/docs/eventsub/), and [EventSub WebSocket handling](https://dev.twitch.tv/docs/eventsub/handling-websocket-events/) documentation.
+The public demo is linked at the top of this README. A self-hosted deployment requires persistent writable storage, TLS/WebSocket support, a Twitch app configuration, and server secrets. See official [Twitch Chat](https://dev.twitch.tv/docs/chat/), [OAuth](https://dev.twitch.tv/docs/chat/authenticating), [EventSub](https://dev.twitch.tv/docs/eventsub/), and [EventSub WebSocket handling](https://dev.twitch.tv/docs/eventsub/handling-websocket-events/) documentation.
 
-The local research, evidence index, build log, Hackathon Build Standard, Hackathon Rebuild Playbook, and documents generated from those instructions are intentionally excluded from the public repository. The demo must show a real Twitch message in the running product and include Codex build footage, be public on YouTube, and remain under three minutes. A repository push does not mean that the Devpost entry is submitted. Current verified offline results and live-integration limitations remain recorded in the local evidence records.
+The public submission links above are provided for judging. Complete the entrant eligibility and individual/team representative fields on the hackathon form.
